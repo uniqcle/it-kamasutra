@@ -6,6 +6,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const app = (0, express_1.default)();
 const port = 3000;
+const HTTP_STATUSES = {
+    OK_200: 200,
+    CREATED_201: 201,
+    NO_CONTENT: 204,
+    NOT_FOUND_404: 404,
+    BAD_REQUEST_400: 400,
+};
 const jsonBodyMiddleware = express_1.default.json();
 app.use(jsonBodyMiddleware);
 const db = {
@@ -16,7 +23,7 @@ const db = {
     ],
 };
 app.get("/", (req, res) => {
-    res.sendStatus(404);
+    res.sendStatus(HTTP_STATUSES.NOT_FOUND_404);
 });
 // get all
 app.get("/courses", (req, res) => {
@@ -30,7 +37,7 @@ app.get("/courses", (req, res) => {
 app.get("/courses/:id", (req, res) => {
     const foundCourse = db.course.find((c) => c.id == +req.params.id);
     if (!foundCourse) {
-        res.sendStatus(404);
+        res.sendStatus(HTTP_STATUSES.NOT_FOUND_404);
         return;
     }
     res.json(foundCourse);
@@ -38,7 +45,7 @@ app.get("/courses/:id", (req, res) => {
 //create
 app.post("/courses", (req, res) => {
     if (!req.body.title) {
-        res.sendStatus(400);
+        res.sendStatus(HTTP_STATUSES.BAD_REQUEST_400);
         return;
     }
     const createdCourse = {
@@ -46,12 +53,12 @@ app.post("/courses", (req, res) => {
         title: req.body.title,
     };
     db.course.push(createdCourse);
-    res.status(201).json(createdCourse);
+    res.status(HTTP_STATUSES.CREATED_201).json(createdCourse);
 });
 // put id
 app.put("/courses/:id", (req, res) => {
     if (!req.body.title) {
-        res.sendStatus(400);
+        res.sendStatus(HTTP_STATUSES.BAD_REQUEST_400);
         return;
     }
     const foundCourse = db.course.find((c) => c.id == +req.params.id);
@@ -65,7 +72,7 @@ app.put("/courses/:id", (req, res) => {
 // delete id
 app.delete("/courses/:id", (req, res) => {
     db.course = db.course.filter((c) => c.id == +req.params.id);
-    res.status(204);
+    res.status(HTTP_STATUSES.NO_CONTENT);
     res.json({});
 });
 app.listen(port, () => {
